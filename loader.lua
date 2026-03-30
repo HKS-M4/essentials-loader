@@ -1,7 +1,6 @@
 -- Essentials – Script Loader (with keep-on-teleport)
 
 local Players        = game:GetService("Players")
-local TeleportService = game:GetService("TeleportService")
 
 -- ====== AUTO REEXECUTE ON TELEPORT (KEEP LOADER) ======
 local queue = queue_on_teleport or queueteleport or (syn and syn.queue_on_teleport)
@@ -16,12 +15,6 @@ end
 if not getgenv()._EssentialsKeepInit then
     getgenv()._EssentialsKeepInit = true
 
-    -- fires on teleport via TeleportService
-    TeleportService.OnTeleportInitiated:Connect(function()
-        queueLoader()
-    end)
-
-    -- fires on serverhop / manual teleport
     Players.LocalPlayer.OnTeleport:Connect(function(state)
         if state == Enum.TeleportState.Started then
             queueLoader()
