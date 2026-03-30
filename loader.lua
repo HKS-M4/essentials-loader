@@ -3,7 +3,7 @@
 local Players = game:GetService("Players")
 
 -- ====== AUTO REEXECUTE ON TELEPORT (KEEP LOADER) ======
-local queue = queue_on_teleport or queueteleport or syn and syn.queue_on_teleport
+local queue = queue_on_teleport or queueteleport or (syn and syn.queue_on_teleport)
 local LOADER_URL = "https://raw.githubusercontent.com/HKS-M4/essentials-loader/main/loader.lua"
 
 if queue and not getgenv()._EssentialsKeepInit then
