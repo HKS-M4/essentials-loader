@@ -1,18 +1,30 @@
 -- Essentials – Script Loader (with keep-on-teleport)
 
-local Players = game:GetService("Players")
+local Players        = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
 
 -- ====== AUTO REEXECUTE ON TELEPORT (KEEP LOADER) ======
 local queue = queue_on_teleport or queueteleport or (syn and syn.queue_on_teleport)
-local LOADER_URL = "https://raw.githubusercontent.com/HKS-M4/essentials-loader/main/loader.lua"
+local LOADER_URL = "https://raw.githubusercontent.com/HKS-M4/essentials-loader/refs/heads/main/loader.lua"
 
-if queue and not getgenv()._EssentialsKeepInit then
+local function queueLoader()
+    if queue then
+        queue(('loadstring(game:HttpGet(%q))()'):format(LOADER_URL))
+    end
+end
+
+if not getgenv()._EssentialsKeepInit then
     getgenv()._EssentialsKeepInit = true
+
+    -- fires on teleport via TeleportService
+    TeleportService.OnTeleportInitiated:Connect(function()
+        queueLoader()
+    end)
+
+    -- fires on serverhop / manual teleport
     Players.LocalPlayer.OnTeleport:Connect(function(state)
         if state == Enum.TeleportState.Started then
-            queue(string.format([[
-                loadstring(game:HttpGet(%q))()
-            ]], LOADER_URL))
+            queueLoader()
         end
     end)
 end
