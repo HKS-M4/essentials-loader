@@ -1,6 +1,8 @@
 -- Essentials – Script Loader (with keep-on-teleport)
 
-local Players        = game:GetService("Players")
+local Players         = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
+local HttpService     = game:GetService("HttpService")
 
 -- ====== AUTO REEXECUTE ON TELEPORT (KEEP LOADER) ======
 local queue = queue_on_teleport
@@ -17,7 +19,7 @@ end)
 
 local TweenService = game:GetService("TweenService")
 
-local lp = Players.LocalPlayer
+local lp        = Players.LocalPlayer
 local playerGui = lp:WaitForChild("PlayerGui")
 
 -- Destroy old hub if re-run
@@ -31,7 +33,7 @@ screenGui.IgnoreGuiInset = true
 screenGui.Parent = playerGui
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 260, 0, 165)
+mainFrame.Size = UDim2.new(0, 260, 0, 222)
 mainFrame.Position = UDim2.new(0.5, -130, 0.22, 0)
 mainFrame.BackgroundColor3 = Color3.fromRGB(5, 3, 15)
 mainFrame.BorderSizePixel = 0
@@ -200,7 +202,7 @@ end
 ------------------------------------------------
 local buttonHolder = Instance.new("Frame")
 buttonHolder.BackgroundTransparency = 1
-buttonHolder.Size = UDim2.new(1, -10, 0, 120)
+buttonHolder.Size = UDim2.new(1, -10, 0, 178)
 buttonHolder.Position = UDim2.new(0, 5, 0, 50)
 buttonHolder.Parent = mainFrame
 
@@ -211,10 +213,10 @@ listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 listLayout.VerticalAlignment = Enum.VerticalAlignment.Top
 listLayout.Parent = buttonHolder
 
-local function createButton(text)
+local function createButton(text, color)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, -10, 0, 22)
-    btn.BackgroundColor3 = Color3.fromRGB(35, 20, 90)
+    btn.BackgroundColor3 = color or Color3.fromRGB(35, 20, 90)
     btn.AutoButtonColor = true
     btn.Font = Enum.Font.Gotham
     btn.TextSize = 13
@@ -229,13 +231,19 @@ local function createButton(text)
     return btn
 end
 
--- Buttons
+-- Script buttons
 local invisBtn    = createButton("FE Invisibility (Universal)")
 local flinguiBtn  = createButton("FE Fling GUI (R6 & R15 Support)")
 local infyieldBtn = createButton("Infinite Yield (Universal)")
 local mm2espBtn   = createButton("MM2 ESP")
 
--- Script bindings
+-- Server buttons
+local rejoinBtn    = createButton("Rejoin",    Color3.fromRGB(20, 50, 90))
+local serverhopBtn = createButton("Serverhop", Color3.fromRGB(20, 50, 90))
+
+------------------------------------------------
+-- SCRIPT BINDINGS
+------------------------------------------------
 invisBtn.MouseButton1Click:Connect(function()
     loadstring(game:HttpGet("https://gist.githubusercontent.com/HKS-M4/4fdaa1a8c4d9fb60fc93967c7bc8fd0e/raw/b1c8a68997d5281b5686108d823c166334b1da32/FE%2520INVIS%2520NEW.lua"))()
 end)
@@ -250,4 +258,57 @@ end)
 
 mm2espBtn.MouseButton1Click:Connect(function()
     loadstring(game:HttpGet("https://gist.githubusercontent.com/HKS-M4/cefc0b0aedc91b9ef36becbbe9315adb/raw/bc99590f872024842ba0a27addd2f251b8e84c31/MM2%2520ESP.lua"))()
+end)
+
+------------------------------------------------
+-- UNIVERSAL TELEPORT HELPER
+------------------------------------------------
+local function universalTeleport(placeId, jobId)
+    if queue then
+        queue(('loadstring(game:HttpGet(%q))()'):format(LOADER_URL))
+    end
+
+    if teleport then
+        if jobId then
+            teleport(placeId, jobId)
+        else
+            teleport(placeId)
+        end
+        return
+    end
+
+    local ok = pcall(function()
+        if jobId then
+            TeleportService:TeleportToPlaceInstance(placeId, jobId)
+        else
+            TeleportService:Teleport(placeId)
+        end
+    end)
+
+    if not ok then
+        TeleportService:Teleport(placeId)
+    end
+end
+
+-- Rejoin
+rejoinBtn.MouseButton1Click:Connect(function()
+    universalTeleport(game.PlaceId)
+end)
+
+-- Serverhop
+serverhopBtn.MouseButton1Click:Connect(function()
+    local url = ("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100"):format(game.PlaceId)
+    local ok, result = pcall(function()
+        return HttpService:JSONDecode(game:HttpGet(url))
+    end)
+    if ok and result and result.data then
+        local currentJobId = game.JobId
+        for _, server in ipairs(result.data) do
+            if server.id ~= currentJobId and server.playing < server.maxPlayers then
+                universalTeleport(game.PlaceId, server.id)
+                return
+            end
+        end
+    end
+    universalTeleport(game.PlaceId)
 end)
