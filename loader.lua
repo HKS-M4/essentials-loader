@@ -3,24 +3,16 @@
 local Players        = game:GetService("Players")
 
 -- ====== AUTO REEXECUTE ON TELEPORT (KEEP LOADER) ======
-local queue = queue_on_teleport or queueteleport or (syn and syn.queue_on_teleport)
+local queue = queue_on_teleport
 local LOADER_URL = "https://raw.githubusercontent.com/HKS-M4/essentials-loader/refs/heads/main/loader.lua"
 
-local function queueLoader()
-    if queue then
-        queue(('loadstring(game:HttpGet(%q))()'):format(LOADER_URL))
-    end
-end
-
-if not getgenv()._EssentialsKeepInit then
-    getgenv()._EssentialsKeepInit = true
-
-    Players.LocalPlayer.OnTeleport:Connect(function(state)
-        if state == Enum.TeleportState.Started then
-            queueLoader()
+Players.LocalPlayer.OnTeleport:Connect(function(state)
+    if state == Enum.TeleportState.Started then
+        if queue then
+            queue(('loadstring(game:HttpGet(%q))()'):format(LOADER_URL))
         end
-    end)
-end
+    end
+end)
 -- ======================================================
 
 local TweenService = game:GetService("TweenService")
