@@ -300,36 +300,30 @@ end)
 -- UNIVERSAL TELEPORT HELPER
 ------------------------------------------------
 local function universalTeleport(placeId, jobId)
-    task.delay(0.1, function()
-        if queue then
-            queue(('loadstring(game:HttpGet(%q))()'):format(LOADER_URL))
+    if queue then
+        queue(('loadstring(game:HttpGet(%q))()'):format(LOADER_URL))
+    end
+
+    if teleport then
+        if jobId then
+            teleport(placeId, jobId)
+        else
+            teleport(placeId)
         end
-      
-        local ok = pcall(function()
-            if teleport then
-                if jobId then
-                    teleport(placeId, jobId)
-                else
-                    teleport(placeId)
-                end
-                return
-            end
-        end)
-        if ok then return end
+        return
+    end
 
-        ok = pcall(function()
-            if jobId then
-                TeleportService:TeleportToPlaceInstance(placeId, jobId)
-            else
-                TeleportService:TeleportToPlaceInstance(placeId, game.JobId)
-            end
-        end)
-        if ok then return end
-
-        pcall(function()
+    local ok = pcall(function()
+        if jobId then
+            TeleportService:TeleportToPlaceInstance(placeId, jobId)
+        else
             TeleportService:Teleport(placeId)
-        end)
+        end
     end)
+
+    if not ok then
+        TeleportService:Teleport(placeId)
+    end
 end
 
 -- Rejoin
