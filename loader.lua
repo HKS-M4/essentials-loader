@@ -15,10 +15,6 @@ Players.LocalPlayer.OnTeleport:Connect(function(state)
             queue(('loadstring(game:HttpGet(%q))()'):format(LOADER_URL))
         end
     end
-
-    if state == Enum.TeleportState.Failed or state == Enum.TeleportState.InProgress then
-        teleporting = false
-    end
 end)
 -- ======================================================
 
@@ -26,9 +22,6 @@ local TweenService = game:GetService("TweenService")
 
 local lp        = Players.LocalPlayer
 local playerGui = lp:WaitForChild("PlayerGui")
-lp.CharacterAdded:Connect(function()
-    teleporting = false
-end)
 
 -- Destroy old hub if re-run
 local old = playerGui:FindFirstChild("ScriptHub")
@@ -237,7 +230,7 @@ local function createButton(text, color)
     c.CornerRadius = UDim.new(0, 6)
     c.Parent = btn
 
-    -- no .Parent here
+    btn.Parent = buttonHolder
     return btn
 end
 
@@ -278,8 +271,7 @@ infyieldBtn.Parent   = buttonHolder
 mm2espBtn.Parent     = buttonHolder
 ndsBtn.Parent        = buttonHolder
 divider.Parent       = buttonHolder
-rejoinBtn.Parent     = buttonHolder
-serverhopBtn.Parent  = buttonHolder
+
 
 ------------------------------------------------
 -- SCRIPT BINDINGS
@@ -342,17 +334,11 @@ end
 
 -- Rejoin
 rejoinBtn.MouseButton1Click:Connect(function()
-    if teleporting then return end
-    teleporting = true
-    rejoinBtn.Text = "Rejoining..."
     universalTeleport(game.PlaceId)
 end)
 
 -- Serverhop
 serverhopBtn.MouseButton1Click:Connect(function()
-    if teleporting then return end
-    teleporting = true
-    serverhopBtn.Text = "Hopping..."
     local url = ("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100"):format(game.PlaceId)
     local ok, result = pcall(function()
         return HttpService:JSONDecode(game:HttpGet(url))
