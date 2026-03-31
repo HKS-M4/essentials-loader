@@ -303,6 +303,7 @@ local function universalTeleport(placeId, jobId)
     if queue then
         queue(('loadstring(game:HttpGet(%q))()'):format(LOADER_URL))
     end
+    task.wait(0.1)
 
     if teleport then
         if jobId then
